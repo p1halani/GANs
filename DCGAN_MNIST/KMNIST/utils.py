@@ -2,7 +2,7 @@ import os
 import numpy as np
 import errno
 import torchvision.utils as vutils
-from tensorboardX import SummaryWriter
+# from tensorboardX import SummaryWriter
 from IPython import display
 from matplotlib import pyplot as plt
 import torch
@@ -22,7 +22,7 @@ class Logger:
         self.data_subdir = '{}/{}'.format(model_name, data_name)
 
         # TensorBoard
-        self.writer = SummaryWriter(comment=self.comment)
+        # self.writer = SummaryWriter(comment=self.comment)
 
     def log(self, d_error, g_error, epoch, n_batch, num_batches):
 
@@ -33,10 +33,10 @@ class Logger:
             g_error = g_error.data.cpu().numpy()
 
         step = Logger._step(epoch, n_batch, num_batches)
-        self.writer.add_scalar(
-            '{}/D_error'.format(self.comment), d_error, step)
-        self.writer.add_scalar(
-            '{}/G_error'.format(self.comment), g_error, step)
+        # self.writer.add_scalar(
+        #     '{}/D_error'.format(self.comment), d_error, step)
+        # self.writer.add_scalar(
+        #     '{}/G_error'.format(self.comment), g_error, step)
 
     def log_images(self, images, num_images, epoch, n_batch, num_batches, format='NCHW', normalize=True):
         '''
@@ -61,7 +61,7 @@ class Logger:
             images, nrow=nrows, normalize=True, scale_each=True)
 
         # Add horizontal images to tensorboard
-        self.writer.add_image(img_name, horizontal_grid, step)
+        # self.writer.add_image(img_name, horizontal_grid, step)
 
         # Save plots
         self.save_torch_images(horizontal_grid, grid, epoch, n_batch)
@@ -122,7 +122,8 @@ class Logger:
                    '{}/D_epoch_{}'.format(out_dir, epoch))
 
     def close(self):
-        self.writer.close()
+        print('Closing')
+        # self.writer.close()
 
     # Private Functionality
 
