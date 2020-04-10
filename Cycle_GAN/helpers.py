@@ -5,6 +5,10 @@ import os
 import pdb
 import pickle
 import argparse
+import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
+import torchvision.datasets as datasets
+import torch.nn as nn
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -15,9 +19,104 @@ import torch
 
 # numpy & scipy imports
 import numpy as np
+import matplotlib.pyplot as plt
 import scipy
 import scipy.misc
 import imageio
+
+# helper conv function
+def conv(in_channels, out_channels, kernel_size, stride=2, padding=1, batch_norm=True):
+    """
+        Creates a convolutional layer, with optional batch normalization.
+    """
+    layers = []
+    conv_layer = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, 
+                           kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+    
+    layers.append(conv_layer)
+
+    if batch_norm:
+        layers.append(nn.BatchNorm2d(out_channels))
+    return nn.Sequential(*layers)
+
+# helper scale function
+def scale(x, feature_range=(-1, 1)):
+    ''' Scale takes in an image x and returns that image, scaled
+       with a feature_range of pixel values from -1 to 1. 
+       This function assumes that the input x is already scaled from 0-1.'''
+    
+    # scale from 0-1 to feature_range
+    min, max = feature_range
+    x = x * (max - min) + min
+    return x
+
+# helper imshow function
+def imshow(img):
+    npimg = img.numpy()
+    plt.imshow(np.transpose(npimg, (1, 2, 0)))
+
+# helper function for printing the model architecture
+def print_models(G_XtoY, G_YtoX, D_X, D_Y):
+    """Prints model information for the generators and discriminators.
+    """
+    print("                     G_XtoY                    ")
+    print("-----------------------------------------------")
+    print(G_XtoY)
+    print()
+
+    print("                     G_YtoX                    ")
+    print("-----------------------------------------------")
+    print(G_YtoX)
+    print()
+
+    print("                      D_X                      ")
+    print("-----------------------------------------------")
+    print(D_X)
+    print()
+
+    print("                      D_Y                      ")
+    print("-----------------------------------------------")
+    print(D_Y)
+    print()
+
+def real_mse_loss(D_out):
+    # how close is the produced output from being "real"?
+    return torch.mean((D_out-1)**2)
+
+def fake_mse_loss(D_out):
+    # how close is the produced output from being "fake"?
+    return torch.mean(D_out**2)
+
+def cycle_consistency_loss(real_im, reconstructed_im, lambda_weight):
+    # calculate reconstruction loss 
+    # as absolute value difference between the real and reconstructed images
+    reconstr_loss = torch.mean(torch.abs(real_im - reconstructed_im))
+    # return weighted loss
+    return lambda_weight*reconstr_loss
+
+def get_data_loader(image_type, image_dir,
+                    image_size=128, batch_size=16, num_workers=3):
+    
+    # resize and normalize the images
+    transform = transforms.Compose([transforms.Resize(image_size), # resize to 128x128
+                                    transforms.ToTensor()])
+
+    # get training and test directories
+    image_path = image_dir
+    train_path = os.path.join(image_path, '{}'.format(image_type))
+
+    test_path = os.path.join(image_path, 'test_{}'.format(image_type))
+
+    # define datasets using ImageFolder
+    train_dataset = datasets.ImageFolder(train_path, transform)
+    test_dataset = datasets.ImageFolder(test_path, transform)
+
+    # create and return DataLoaders
+    train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+
+    return train_loader, test_loader
+
 
 
 def checkpoint(iteration, G_XtoY, G_YtoX, D_X, D_Y, checkpoint_dir='checkpoints_cyclegan'):

@@ -27,8 +27,18 @@ from helpers import (kmnist_dataloader,noise, init_weights, train_discriminator,
 @ck.option(
     '--num-workers', '-nw', default=3,
     help='Number of parallel workers')
+@ck.option(
+    '--learning-rate', '-lr', default=0.0002,
+    help='Store Learning rate')
+@ck.option(
+    '--beta1', '-b1', default=0.5,
+    help='Beta 1 value')
+@ck.option(
+    '--beta2', '-b2', default=0.999,
+    help='Beta 2 value')
 
-def main(batch_size, epochs, data_file, num_test_samples, num_workers):
+
+def main(batch_size, epochs, data_file, num_test_samples, num_workers, learning_rate, beta1, beta2):
 
     # Create loader with data, so that we can iterate over it
     data_loader = kmnist_dataloader(data_file, batch_size, num_workers)
@@ -39,8 +49,8 @@ def main(batch_size, epochs, data_file, num_test_samples, num_workers):
     generator, discriminator = create_model()
 
     # Optimizers
-    d_optimizer = optim.Adam(discriminator.parameters(), lr=0.0002, betas=(0.5, 0.999))
-    g_optimizer = optim.Adam(generator.parameters(), lr=0.0002, betas=(0.5, 0.999))
+    d_optimizer = optim.Adam(discriminator.parameters(), lr=learning_rate, betas=(beta1, beta2))
+    g_optimizer = optim.Adam(generator.parameters(), lr=learning_rate, betas=(beta1, beta2))
 
     # Loss function
     loss = nn.BCELoss()
