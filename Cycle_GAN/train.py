@@ -1,6 +1,6 @@
 # loading in and transforming data
 import os
-# import click as ck
+import click as ck
 import torch
 from torch.utils.data import DataLoader
 import torchvision
@@ -21,40 +21,32 @@ from Dis_model import Discriminator
 from CycleGen_model import CycleGenerator
 from Model import create_model
 
-# @ck.command()
-# @ck.option(
-#     '--batch-size', '-bs', default=100,
-#     help='Batch size')
-# @ck.option(
-#     '--epochs', '-e', default=200,
-#     help='Training epochs')
-# @ck.option(
-#     '--learning-rate', '-lr', default=0.0002,
-#     help='Store Learning rate')
-# @ck.option(
-#     '--beta1', '-b1', default=0.5,
-#     help='Beta 1 value')
-# @ck.option(
-#     '--beta2', '-b2', default=0.999,
-#     help='Beta 2 value')
-# @ck.option(
-#     '--data-path', '-dp', default='./datasets/summer2winter',
-#     help='Beta 2 value')
-# @ck.option(
-#     '--num-workers', '-nw', default=3,
-#     help='Number of parallel workers')
-# batch_size, epochs,learning_rate, beta1, beta2, data_path, num_workers
-def main():
+@ck.command()
+@ck.option(
+    '--batch-size', '-bs', default=100,
+    help='Batch size')
+@ck.option(
+    '--epochs', '-e', default=200,
+    help='Training epochs')
+@ck.option(
+    '--learning-rate', '-lr', default=0.0002,
+    help='Store Learning rate')
+@ck.option(
+    '--beta1', '-b1', default=0.5,
+    help='Beta 1 value')
+@ck.option(
+    '--beta2', '-b2', default=0.999,
+    help='Beta 2 value')
+@ck.option(
+    '--data-path', '-dp', default='./datasets/summer2winter',
+    help='Beta 2 value')
+@ck.option(
+    '--num-workers', '-nw', default=3,
+    help='Number of parallel workers')
+
+def main(batch_size, epochs,learning_rate, beta1, beta2, data_path, num_workers):
     # Create train and test dataloaders for images from the two domains X and Y
     # image_type = directory names for our data
-
-    batch_size = 100
-    epochs = 1
-    learning_rate = 0.0002
-    beta1 = 0.5
-    beta2 = 0.999
-    data_path = './datasets/summer2winter'
-    num_workers = 3
 
     dataloader_X, test_dataloader_X = get_data_loader(image_type='summer', image_dir=data_path, batch_size=batch_size)
     dataloader_Y, test_dataloader_Y = get_data_loader(image_type='winter', image_dir=data_path, batch_size=batch_size)
